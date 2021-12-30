@@ -1,0 +1,27 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "==3"
+djangorestframework = "*"
+python-dotenv = "*"
+psycopg2-binary = "==2.7.7"
+pyyaml = "*"
+django-filter = "*"
+djangorestframework-simplejwt = "*"
+django-suit = {file = "https://github.com/darklow/django-suit/tarball/v2"}
+pytest-cov = "*"
+pytest-django = "*"
+pytest-xdist = "*"
+
+[dev-packages]
+mypy = "*"
+black = "*"
+pylint = "*"
+flake8 = "*"
+pytest = "*"
+
+[requires]
+python_version = "3.6"
