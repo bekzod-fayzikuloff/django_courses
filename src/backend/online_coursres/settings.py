@@ -45,12 +45,14 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "django_filters",
+    'crispy_forms',
+
     # local_app
     "user.apps.UserConfig",
     "courses.apps.CoursesConfig",
 
 ]
-
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 SITE_ID = 1
 
 MIDDLEWARE = [

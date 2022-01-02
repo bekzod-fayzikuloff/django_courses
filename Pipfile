@@ -15,6 +15,7 @@ django-suit = {file = "https://github.com/darklow/django-suit/tarball/v2"}
 pytest-cov = "*"
 pytest-django = "*"
 pytest-xdist = "*"
+django-crispy-forms = "*"
 
 [dev-packages]
 mypy = "*"

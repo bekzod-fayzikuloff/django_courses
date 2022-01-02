@@ -1,1 +1,1 @@
-<h1>Hello My Man</h1>
+<h2>Online Courses App</h2>

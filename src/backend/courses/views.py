@@ -12,7 +12,18 @@ from rest_framework.response import Response
 
 
 from .mixins import BaseActionMixin
-from .permissions import IsCourseTeacher, IsLectureCourseTeacher, IsLectureCourseStudent, IsHomeWorkOwner
+from .filters import (
+    CourseFilter,
+    LectureFilter,
+    HomeworkFilter,
+    ScoreFilter
+)
+from .permissions import (
+    IsCourseTeacher,
+    IsLectureCourseTeacher,
+    IsLectureCourseStudent,
+    IsHomeWorkOwner
+)
 from .services import (
     CourseService,
     LectureService,
@@ -23,7 +34,15 @@ from .services import (
     get_represent_list_data,
 )
 
-from .models import Course, Lecture, Homework, Score, Teacher, Student, Comment
+from .models import (
+    Course,
+    Lecture,
+    Homework,
+    Score,
+    Teacher,
+    Student,
+    Comment
+)
 from .serializers import (
     BaseCourseSerializer,
     ListCourseSerializer,
@@ -63,7 +82,7 @@ class CourseViewSet(
     permission_classes = [
         permissions.IsAuthenticated(),
     ]
-    filterset_fields = ["name", "description", "owner__user__username"]
+    _filterset_class = CourseFilter
     service = CourseService
 
     def list(self, request: Request, *args, **kwargs) -> Response:
@@ -188,6 +207,9 @@ class CourseViewSet(
         }
         return actions.get(self.action, self.queryset)
 
+    def filter_queryset(self, queryset):
+        return self._filterset_class(self.request.GET, self.queryset).qs
+
     def get_serializer_class(self):
         """
         override get_serializer_class method for getting soft interface to take need serialize class depending on action
@@ -250,7 +272,7 @@ class LectureViewSet(
     permission_classes = [permissions.IsAuthenticated(), IsLectureCourseTeacher(), IsLectureCourseStudent()]
     actions = {"list": ListLectureSerializer, "retrieve": RetrieveLectureSerializer}
     queryset = Lecture.objects.all()
-    filterset_fields = ["name", "course__name", "course__owner__user__username"]
+    _filterset_class = LectureFilter
     service = LectureService
 
     def list(self, request: Request, *args, **kwargs) -> Response:
@@ -345,6 +367,9 @@ class LectureViewSet(
         actions = {"homeworks": Homework.objects.all()}
         return actions.get(self.action, self.queryset)
 
+    def filter_queryset(self, queryset):
+        return self._filterset_class(self.request.GET, self.queryset).qs
+
 
 class HomeworkViewSet(viewsets.ModelViewSet, BaseActionMixin):
     """
@@ -356,9 +381,8 @@ class HomeworkViewSet(viewsets.ModelViewSet, BaseActionMixin):
     permission_classes = [
         permissions.IsAuthenticated()
     ]
-
+    _filterset_class = HomeworkFilter
     queryset = Homework.objects.all()
-    filterset_fields = ["owner__user__username", "lecture__name", "lecture__course__owner__user__username"]
     service = HomeworkService
 
     def list(self, request: Request, *args, **kwargs) -> Response:
@@ -426,7 +450,8 @@ class HomeworkViewSet(viewsets.ModelViewSet, BaseActionMixin):
         return actions.get(self.action, self.permission_classes)
 
     def get_serializer_class(self):
-        """
+        """    def filter_queryset(self, queryset):
+        return self._filterset_class(self.request.GET, self.queryset).qs
         override get_serializer_class method for getting soft interface
         to take need serializer class depending on action
         :return:
@@ -436,6 +461,9 @@ class HomeworkViewSet(viewsets.ModelViewSet, BaseActionMixin):
             "add_score": RetrieveScoreSerializer,
         }
         return actions.get(self.action, self.serializer_class)
+
+    def filter_queryset(self, queryset):
+        return self._filterset_class(self.request.GET, self.queryset).qs
 
     def get_queryset(self) -> QuerySet:
         """
@@ -459,7 +487,7 @@ class ScoreViewSet(
 
     queryset = Score.objects.all()
     serializer_class = BaseScoreSerializer
-    filterset_fields = ["grader__user__username", "score", "homework__lecture__name"]
+    _filterset_class = ScoreFilter
 
     @action(methods=["GET"], detail=True)
     def comments(self, request: Request, **kwargs) -> Response:
@@ -514,6 +542,9 @@ class ScoreViewSet(
             "comments": Comment.objects.all(),
         }
         return actions.get(self.action, self.queryset)
+
+    def filter_queryset(self, queryset):
+        return self._filterset_class(self.request.GET, self.queryset).qs
 
     def get_action_model(self):
         """
