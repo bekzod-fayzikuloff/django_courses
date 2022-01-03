@@ -12,18 +12,8 @@ from rest_framework.response import Response
 
 
 from .mixins import BaseActionMixin
-from .filters import (
-    CourseFilter,
-    LectureFilter,
-    HomeworkFilter,
-    ScoreFilter
-)
-from .permissions import (
-    IsCourseTeacher,
-    IsLectureCourseTeacher,
-    IsLectureCourseStudent,
-    IsHomeWorkOwner
-)
+from .filters import CourseFilter, LectureFilter, HomeworkFilter, ScoreFilter
+from .permissions import IsCourseTeacher, IsLectureCourseTeacher, IsLectureCourseStudent, IsHomeWorkOwner
 from .services import (
     CourseService,
     LectureService,
@@ -34,15 +24,7 @@ from .services import (
     get_represent_list_data,
 )
 
-from .models import (
-    Course,
-    Lecture,
-    Homework,
-    Score,
-    Teacher,
-    Student,
-    Comment
-)
+from .models import Course, Lecture, Homework, Score, Teacher, Student, Comment
 from .serializers import (
     BaseCourseSerializer,
     ListCourseSerializer,
@@ -241,8 +223,8 @@ class CourseViewSet(
                 IsCourseTeacher(),
             ],
             "remove_student": [
-                    IsCourseTeacher(),
-            ]
+                IsCourseTeacher(),
+            ],
         }
         return actions.get(self.action, self.permission_classes)
 
@@ -378,9 +360,7 @@ class HomeworkViewSet(viewsets.ModelViewSet, BaseActionMixin):
 
     serializer_class = BaseHomeworkSerializer
     actions = {"list": ListHomeworkSerializer, "retrieve": RetrieveHomeworkSerializer}
-    permission_classes = [
-        permissions.IsAuthenticated()
-    ]
+    permission_classes = [permissions.IsAuthenticated()]
     _filterset_class = HomeworkFilter
     queryset = Homework.objects.all()
     service = HomeworkService
@@ -450,7 +430,7 @@ class HomeworkViewSet(viewsets.ModelViewSet, BaseActionMixin):
         return actions.get(self.action, self.permission_classes)
 
     def get_serializer_class(self):
-        """    def filter_queryset(self, queryset):
+        """def filter_queryset(self, queryset):
         return self._filterset_class(self.request.GET, self.queryset).qs
         override get_serializer_class method for getting soft interface
         to take need serializer class depending on action
