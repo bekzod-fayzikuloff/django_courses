@@ -2,4 +2,5 @@ from .config import BaseService, get_represent_list_data, get_represent_retrieve
 from .course_service import CourseService
 from .lecture_service import LectureService
 from .homework_service import HomeworkService
+from .user_service import UserService
 from .score_service import get_comments

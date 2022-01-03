@@ -1,5 +1,5 @@
 from django_filters import rest_framework as filters
-from .models import Course, Lecture, Homework, Score
+from .models import Course, Lecture, Homework, Score, Comment
 
 
 class CourseFilter(filters.FilterSet):
@@ -40,3 +40,9 @@ class ScoreFilter(filters.FilterSet):
             "score": ["exact", "contains"],
             "homework__lecture__name": ["exact", "contains"],
         }
+
+
+class CommentFilter(filters.FilterSet):
+    class Meta:
+        model = Comment
+        fields = ["score", "text"]

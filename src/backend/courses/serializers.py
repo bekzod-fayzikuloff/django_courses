@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from rest_framework import serializers
 from .utils.functional import (
     get_course_lectures,
@@ -6,6 +7,7 @@ from .utils.functional import (
     get_lecture_homeworks,
     get_homework_scores,
     get_score_comments,
+    get_average_score,
 )
 from .models import Course, Lecture, Student, Teacher, Homework, Score, Comment
 
@@ -151,3 +153,15 @@ class CommentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ("text",)
+
+
+class UserSerializer(serializers.ModelSerializer):
+    average_score = serializers.SerializerMethodField("get_average_score")
+
+    @staticmethod
+    def get_average_score(user):
+        return get_average_score(user)
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "email", "average_score"]

@@ -1,4 +1,4 @@
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Avg
 
 from ..models import Lecture, Student, Teacher, Course, Homework, Score, Comment
 
@@ -31,3 +31,10 @@ def get_homework_scores(homework: Homework) -> QuerySet:
 def get_score_comments(score: Score):
     queryset = Comment.objects.filter(score=score)
     return queryset
+
+
+def get_average_score(user) -> float:
+    student = Student.objects.get(user=user)
+    homeworks = Homework.objects.filter(owner=student)
+    average_score = Score.objects.filter(homework__in=homeworks).aggregate(Avg("score"))
+    return average_score.get("score__avg")

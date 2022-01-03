@@ -12,12 +12,13 @@ from rest_framework.response import Response
 
 
 from .mixins import BaseActionMixin
-from .filters import CourseFilter, LectureFilter, HomeworkFilter, ScoreFilter
+from .filters import CourseFilter, LectureFilter, HomeworkFilter, ScoreFilter, CommentFilter
 from .permissions import IsCourseTeacher, IsLectureCourseTeacher, IsLectureCourseStudent, IsHomeWorkOwner
 from .services import (
     CourseService,
     LectureService,
     HomeworkService,
+    UserService,
     get_represent_retrieve_data,
     get_represent_action_data,
     get_comments,
@@ -42,6 +43,7 @@ from .serializers import (
     ListStudentSerializer,
     CommentSerializer,
     CommentCreateSerializer,
+    UserSerializer,
 )
 
 
@@ -190,6 +192,11 @@ class CourseViewSet(
         return actions.get(self.action, self.queryset)
 
     def filter_queryset(self, queryset):
+        """
+        override filter_queryset method for getting soft interface to take need queryset with filtering
+        :param queryset:
+        :return:
+        """
         return self._filterset_class(self.request.GET, self.queryset).qs
 
     def get_serializer_class(self):
@@ -350,6 +357,11 @@ class LectureViewSet(
         return actions.get(self.action, self.queryset)
 
     def filter_queryset(self, queryset):
+        """
+        override filter_queryset method for getting soft interface to take need queryset with filtering
+        :param queryset:
+        :return:
+        """
         return self._filterset_class(self.request.GET, self.queryset).qs
 
 
@@ -443,6 +455,11 @@ class HomeworkViewSet(viewsets.ModelViewSet, BaseActionMixin):
         return actions.get(self.action, self.serializer_class)
 
     def filter_queryset(self, queryset):
+        """
+        override filter_queryset method for getting soft interface to take need queryset with filtering
+        :param queryset:
+        :return:
+        """
         return self._filterset_class(self.request.GET, self.queryset).qs
 
     def get_queryset(self) -> QuerySet:
@@ -524,6 +541,11 @@ class ScoreViewSet(
         return actions.get(self.action, self.queryset)
 
     def filter_queryset(self, queryset):
+        """
+        override filter_queryset method for getting soft interface to take need queryset with filtering
+        :param queryset:
+        :return:
+        """
         return self._filterset_class(self.request.GET, self.queryset).qs
 
     def get_action_model(self):
@@ -535,3 +557,155 @@ class ScoreViewSet(
             "add_comment": Score,
         }
         return actions.get(self.action, self.queryset)
+
+
+class UserViewSet(viewsets.GenericViewSet):
+    """
+    class UserViewSet realize user actions and endpoints handling
+    """
+
+    serializer_class = UserSerializer
+    service = UserService
+
+    def list(self, request: Request) -> Response:
+        """
+        list method get <request: Request>, and realize performance output current user
+        instance data which hiding in service layer
+        :param request:
+        :return:
+        """
+        data = self.get_serializer_class()(self.request.user).data
+        return Response(data)
+
+    @action(methods=["GET"], detail=False)
+    def courses(self, request: Request) -> Response:
+        """
+        courses method get <request: Request>, and realize performance output current user
+        instance all courses list data which hiding in service layer
+        :param request:
+        :return:
+        """
+        queryset = self.filter_queryset(self.service(self).get_courses())
+        data = self.get_serializer_class()(queryset, many=True).data
+        return Response(data=data)
+
+    @action(methods=["GET"], detail=False)
+    def course_as_teacher(self, request: Request) -> Response:
+        """
+        course_as_teacher method get <request: Request>, and realize performance output current user
+        instance with courses list data where current user is a teacher, logic hiding in service layer
+        :param request:
+        :return:
+        """
+        queryset = self.filter_queryset(self.service(self).get_courses_as_teacher())
+        data = self.get_serializer_class()(queryset, many=True).data
+        return Response(data=data)
+
+    @action(methods=["GET"], detail=False)
+    def course_as_student(self, request: Request) -> Response:
+        """
+        course_as_student method get <request: Request>, and realize performance output current user
+        instance with courses list data where current user is a student, logic hiding in service layer
+        :param request:
+        :return:
+        """
+        queryset = self.filter_queryset(self.service(self).get_courses_as_student())
+        data = self.get_serializer_class()(queryset, many=True).data
+        return Response(data=data)
+
+    @action(methods=["GET"], detail=False)
+    def lectures(self, request: Request) -> Response:
+        """
+        lectures method get <request: Request>, and realize performance output current user
+        instance lectures list data which hiding in service layer
+        :param request:
+        :return:
+        """
+        queryset = self.filter_queryset(self.service(self).get_lecture())
+        data = self.get_serializer_class()(queryset, many=True).data
+        return Response(data=data)
+
+    @action(methods=["GET"], detail=False)
+    def homeworks(self, request: Request) -> Response:
+        """
+        homeworks method get <request: Request>, and realize performance output current user
+        instance homeworks list data which hiding in service layer
+        :param request:
+        :return:
+        """
+        queryset = self.filter_queryset(self.service(self).get_homeworks())
+        data = self.get_serializer_class()(queryset, many=True).data
+        return Response(data=data)
+
+    @action(methods=["GET"], detail=False)
+    def comments(self, request: Request) -> Response:
+        """
+        comments method get <request: Request>, and realize performance output current user
+        instance comments list data which hiding in service layer
+        :param request:
+        :return:
+        """
+        queryset = self.filter_queryset(self.service(self).get_comments())
+        data = self.get_serializer_class()(queryset, many=True).data
+        return Response(data=data)
+
+    @action(methods=["GET"], detail=False)
+    def scores(self, request: Request) -> Response:
+        """
+        scores method get <request: Request>, and realize performance output current user
+        instance scores list data which hiding in service layer
+        :param request:
+        :return:
+        """
+        queryset = self.filter_queryset(self.service(self).get_scores())
+        data = self.get_serializer_class()(queryset, many=True).data
+        return Response(data)
+
+    def get_queryset(self):
+        """
+        override get_queryset method for getting soft interface to take need queryset depending on action
+        :return:
+        """
+        actions = {
+            "courses": Course.objects.all(),
+            "course_as_teacher": Course.objects.all(),
+            "course_as_student": Course.objects.all(),
+            "lectures": Lecture.objects.all(),
+            "homeworks": Homework.objects.all(),
+            "comments": Comment.objects.all(),
+            "scores": Score.objects.all(),
+        }
+        return actions.get(self.action, list())
+
+    def get_serializer_class(self):
+        """
+        override get_queryset method for getting soft interface to take need serializer class depending on action
+        :return:
+        """
+        actions = {
+            "courses": ListCourseSerializer,
+            "course_as_teacher": ListCourseSerializer,
+            "course_as_student": ListCourseSerializer,
+            "lectures": ListLectureSerializer,
+            "homeworks": ListHomeworkSerializer,
+            "comments": CommentSerializer,
+            "scores": BaseScoreSerializer,
+        }
+        return actions.get(self.action, self.serializer_class)
+
+    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
+        """
+        override filter_queryset method for getting soft interface to take need queryset with filtering
+        :param queryset:
+        :return:
+        """
+        actions = {
+            "courses": CourseFilter,
+            "course_as_teacher": CourseFilter,
+            "course_as_student": CourseFilter,
+            "lectures": LectureFilter,
+            "homeworks": HomeworkFilter,
+            "comments": CommentFilter,
+            "scores": ScoreFilter,
+        }
+        return actions.get(self.action)(self.request.GET, queryset).qs
