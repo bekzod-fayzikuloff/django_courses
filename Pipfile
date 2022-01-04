@@ -16,6 +16,8 @@ pytest-cov = "*"
 pytest-django = "*"
 pytest-xdist = "*"
 django-crispy-forms = "*"
+faker = "*"
+factory-boy = "*"
 
 [dev-packages]
 mypy = "*"

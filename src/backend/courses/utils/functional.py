@@ -34,7 +34,10 @@ def get_score_comments(score: Score):
 
 
 def get_average_score(user) -> float:
-    student = Student.objects.get(user=user)
-    homeworks = Homework.objects.filter(owner=student)
-    average_score = Score.objects.filter(homework__in=homeworks).aggregate(Avg("score"))
-    return average_score.get("score__avg")
+    try:
+        student = Student.objects.get(user=user)
+        homeworks = Homework.objects.filter(owner=student)
+        average_score = Score.objects.filter(homework__in=homeworks).aggregate(Avg("score")).get("score__avg")
+    except Student.DoesNotExist:
+        average_score = 0
+    return average_score

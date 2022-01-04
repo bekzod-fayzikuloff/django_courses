@@ -91,9 +91,8 @@ class CourseViewSet(
         :param kwargs:
         :return:
         """
-        data = get_represent_retrieve_data(self, request, *args, **kwargs)
-
-        return Response(data=data)
+        #  data = get_represent_retrieve_data(self, request, *args, **kwargs)  # Customize course list result
+        return super().retrieve(request, *args, **kwargs)  # return Response(data=data)
 
     @action(methods=["GET"], detail=True, name="Course students")
     def course_students(self, request: Request, **kwargs) -> Response:
@@ -205,6 +204,7 @@ class CourseViewSet(
         :return:
         """
         actions = {
+            "retrieve": RetrieveCourseSerializer,
             "course_students": ListStudentSerializer,
             "course_teachers": ListTeacherSerializer,
             "lectures": RetrieveLectureSerializer,
@@ -484,6 +484,9 @@ class ScoreViewSet(
 
     queryset = Score.objects.all()
     serializer_class = BaseScoreSerializer
+    permission_classes = [
+        permissions.IsAuthenticated,
+    ]
     _filterset_class = ScoreFilter
 
     @action(methods=["GET"], detail=True)
@@ -566,6 +569,9 @@ class UserViewSet(viewsets.GenericViewSet):
 
     serializer_class = UserSerializer
     service = UserService
+    permission_classes = [
+        permissions.IsAuthenticated,
+    ]
 
     def list(self, request: Request) -> Response:
         """

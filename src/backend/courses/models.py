@@ -4,26 +4,28 @@ from django.db import models
 
 class Student(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    course = models.ManyToManyField("Course", blank=True, null=True)
+    course = models.ManyToManyField("Course", blank=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self) -> str:
         return f"{self.user.username}: {self.course.name}"
 
     class Meta:
+        app_label = "courses"
         verbose_name = "student"
         verbose_name_plural = "students"
 
 
 class Teacher(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    course = models.ManyToManyField("Course", blank=True, null=True)
+    course = models.ManyToManyField("Course", blank=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self) -> str:
         return f"{self.user.username}: {self.course.name}"
 
     class Meta:
+        app_label = "courses"
         verbose_name = "teacher"
         verbose_name_plural = "teachers"
 

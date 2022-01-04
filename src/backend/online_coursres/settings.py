@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'django.contrib.sites',
     # 3rd party
     "rest_framework",
     "rest_framework_simplejwt",
@@ -48,8 +49,8 @@ INSTALLED_APPS = [
     "django_filters",
     "crispy_forms",
     # local_app
-    "user.apps.UserConfig",
     "courses.apps.CoursesConfig",
+    "user.apps.UserConfig",
 ]
 CRISPY_TEMPLATE_PACK = "bootstrap4"
 SITE_ID = 1
@@ -96,7 +97,10 @@ DATABASES = {
         "PASSWORD": os.environ.get("DB_PASSWORD"),
         "HOST": "localhost",  # os.environ.get("DB_HOST"),
         "PORT": int(os.environ.get("DB_PORT")),
-    }
+        'TEST': {
+            'NAME': os.environ.get("TEST_DB_NAME"),
+        },
+    },
 }
 
 # Password validation
@@ -134,6 +138,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
     ),
     "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
+    "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }
 
 SIMPLE_JWT = {

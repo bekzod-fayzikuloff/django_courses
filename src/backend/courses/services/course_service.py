@@ -6,7 +6,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
 
 from .config import BaseService
-from ..models import Course, Student
+from courses.models import Course, Student
 
 
 class CourseService(BaseService):

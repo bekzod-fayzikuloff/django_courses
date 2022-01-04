@@ -4,7 +4,7 @@ from django.db.models import QuerySet
 from rest_framework.generics import get_object_or_404
 
 from .config import BaseService
-from ..models import Lecture
+from courses.models import Lecture
 
 
 class LectureService(BaseService):
