@@ -12,13 +12,15 @@ from rest_framework.response import Response
 
 
 from .mixins import BaseActionMixin
-from .filters import CourseFilter, LectureFilter, HomeworkFilter, ScoreFilter, CommentFilter
+from .filters import CourseFilter, LectureFilter, HomeworkFilter, ScoreFilter, CommentFilter, TeacherFilter, \
+    StudentFilter
 from .permissions import IsCourseTeacher, IsLectureCourseTeacher, IsLectureCourseStudent, IsHomeWorkOwner
 from .services import (
     CourseService,
     LectureService,
     HomeworkService,
     UserService,
+    UserAsTeacherService,
     get_represent_retrieve_data,
     get_represent_action_data,
     get_comments,
@@ -44,6 +46,7 @@ from .serializers import (
     CommentSerializer,
     CommentCreateSerializer,
     UserSerializer,
+    LectureCreateIntoCourseSerializer,
 )
 
 
@@ -715,3 +718,216 @@ class UserViewSet(viewsets.GenericViewSet):
             "scores": ScoreFilter,
         }
         return actions.get(self.action)(self.request.GET, queryset).qs
+
+
+class UserAsTeacherViewSet(
+    viewsets.GenericViewSet,
+    mixins.DestroyModelMixin,
+):
+    service = UserAsTeacherService
+    serializer_class = UserSerializer
+
+    def list(self, request: Request) -> Response:
+        queryset = self.filter_queryset(self.get_depends())
+        data = self.get_serializer_class()(queryset, many=True).data
+        return Response(data=data)
+
+    def retrieve(self, request, pk):
+        queryset = self.service(self).get_retrieve(request, pk=pk)
+        data = self.get_serializer_class()(queryset).data
+        return Response(data=data)
+
+    @action(methods=["GET"], detail=False)
+    def lectures(self, request: Request) -> Response:
+        service = self.service(self)
+        queryset = self.filter_queryset(
+            service.get_action_list(service.action_list_filter())
+        )
+        data = self.get_serializer_class()(queryset, many=True).data
+        return Response(data=data)
+
+    @action(methods=["GET"], detail=False)
+    def homeworks(self, request: Request) -> Response:
+        service = self.service(self)
+        queryset = service.get_action_list(service.action_list_filter())
+        data = self.get_serializer_class()(queryset, many=True).data
+        return Response(data=data)
+
+    @action(methods=["GET"], detail=False)
+    def comments(self, request: Request) -> Response:
+        service = self.service(self)
+        queryset = service.get_action_list(service.action_list_filter())
+        data = self.get_serializer_class()(queryset, many=True).data
+        return Response(data=data)
+
+    @action(methods=["GET"], detail=False)
+    def scores(self, request: Request) -> Response:
+        service = self.service(self)
+        queryset = self.filter_queryset(
+            service.get_action_list(service.action_list_filter())
+        )
+        data = self.get_serializer_class()(queryset, many=True).data
+        return Response(data=data)
+
+    @action(methods=["GET"], detail=True)
+    def course_lecture(self, request: Request, pk: int, lecture_pk: int = None) -> Response:
+        service = self.service(self)
+        queryset = \
+            self.filter_queryset(
+                service.get_course_actions(
+                    request, pk=pk, filter_mask=service.get_course_filter
+                )
+            )
+        if lecture_pk is not None:
+            return service.get_instance(queryset=queryset, pk=lecture_pk)
+        data = self.get_serializer_class()(queryset, many=True).data
+        return Response(data=data)
+
+    @action(methods=["GET"], detail=True)
+    def course_students(self, request: Request, pk: int) -> Response:
+        queryset = \
+            self.filter_queryset(
+                self.service(self).get_course_actions(
+                    request, pk=pk, filter_mask=self.service.get_course_filter
+                )
+            )
+        data = self.get_serializer_class()(queryset, many=True).data
+        return Response(data=data)
+
+    @action(methods=["GET"], detail=True)
+    def course_teachers(self, request: Request, pk: int) -> Response:
+        queryset = \
+            self.filter_queryset(
+                self.service(self).get_course_actions(
+                    request, pk=pk, filter_mask=self.service.get_course_filter
+                )
+            )
+        data = self.get_serializer_class()(queryset, many=True).data
+        return Response(data=data)
+
+    @action(methods=["GET"], detail=True)
+    def course_homeworks(self, request: Request, pk: int, homework_pk: int = None) -> Response:
+        service = self.service(self)
+        queryset = \
+            self.filter_queryset(
+                service.get_course_actions(
+                    request, pk=pk, filter_mask=service.get_course_homework_filter
+                )
+            )
+        if homework_pk is not None:
+            service.get_instance(queryset=queryset, pk=homework_pk)
+        data = self.get_serializer_class()(queryset, many=True).data
+        return Response(data=data)
+
+    @action(methods=["GET"], detail=True)
+    def course_scores(self, request: Request, pk: int) -> Response:
+        queryset = \
+            self.filter_queryset(
+                self.service(self).get_course_actions(
+                    request, pk=pk, filter_mask=self.service.get_course_score_filter
+                )
+            )
+        data = self.get_serializer_class()(queryset, many=True).data
+        return Response(data=data)
+
+    @action(methods=["GET"], detail=True)
+    def course_comments(self, request: Request, pk: int) -> Response:
+        queryset = \
+            self.filter_queryset(
+                self.service(self).get_course_actions(
+                    request, pk=pk, filter_mask=self.service.get_course_comment_filter
+                )
+            )
+        data = self.get_serializer_class()(queryset, many=True).data
+        return Response(data=data)
+
+    @action(methods=["POST"], detail=True)
+    def add_student(self, request: Request, pk: int) -> Response:
+        result = self.service(self).add_into_course(pk=pk)
+        data = BaseCourseSerializer(result).data
+        return Response(data=data, status=status.HTTP_201_CREATED)
+
+    @action(methods=["POST"], detail=True)
+    def add_teacher(self, request: Request, pk: int) -> Response:
+        result = self.service(self).add_into_course(pk=pk)
+        data = BaseCourseSerializer(result).data
+        return Response(data=data, status=status.HTTP_201_CREATED)
+
+    @action(methods=["POST"], detail=True)
+    def remove_student(self, request: Request, pk: int) -> Response:
+        result = self.service(self).remove_into_course(pk=pk)
+        data = BaseCourseSerializer(result).data
+        return Response(data=data, status=status.HTTP_201_CREATED)
+
+    @action(methods=["POST"], detail=True)
+    def add_lecture(self, request: Request, pk: int) -> Response:
+        return self.service(self).create_lecture(pk=pk)
+
+    def get_serializer_class(self):
+        actions = {
+            "list": ListCourseSerializer,
+            "retrieve": RetrieveCourseSerializer,
+            "lectures": ListLectureSerializer,
+            "homeworks": ListHomeworkSerializer,
+            "comments": CommentSerializer,
+            "scores": BaseScoreSerializer,
+            "course_lecture": ListLectureSerializer,
+            "course_students": ListStudentSerializer,
+            "course_teachers": ListTeacherSerializer,
+            "course_homeworks": ListHomeworkSerializer,
+            "course_scores": BaseScoreSerializer,
+            "course_comments": CommentSerializer,
+            "add_student": BaseStudentSerializer,
+            "add_teacher": ListTeacherSerializer,
+            "remove_student": BaseStudentSerializer,
+            "add_lecture": LectureCreateIntoCourseSerializer,
+            "add_score": BaseScoreSerializer
+        }
+        return actions.get(self.action, self.serializer_class)
+
+    def get_queryset(self):
+        actions = {
+            "list": Course.objects.all(),
+            "retrieve": Course.objects.all(),
+            "lectures": Lecture.objects.all(),
+            "homeworks": Homework.objects.all(),
+            "comments": Comment.objects.all(),
+            "scores": Score.objects.all(),
+            "course_lecture": Lecture.objects.all(),
+            "course_students": Student.objects.all(),
+            "course_teachers": Teacher.objects.all(),
+            "course_homeworks": Homework.objects.all(),
+            "course_scores": Score.objects.all(),
+            "course_comments": Comment.objects.all(),
+        }
+        return actions.get(self.action)
+
+    def filter_queryset(self, queryset):
+        actions = {
+            "list": CourseFilter,
+            "lectures": LectureFilter,
+            "homeworks": HomeworkFilter,
+            "comments": CommentFilter,
+            "scores": ScoreFilter,
+            "course_lecture": LectureFilter,
+            "course_students": StudentFilter,
+            "course_teachers": TeacherFilter,
+            "course_homeworks": HomeworkFilter,
+            "course_scores": ScoreFilter,
+            "course_comments": CommentFilter
+        }
+        return actions.get(self.action)(self.request.GET, queryset).qs
+
+    def get_depends(self, **params):
+        actions = {
+            "list": UserService(self).get_courses_as_teacher(),
+        }
+        return actions.get(self.action)
+
+    def get_action_mode(self):
+        actions = {
+            "add_student": Student,
+            "add_teacher": Teacher,
+            "remove_student": Student
+        }
+        return actions.get(self.action)

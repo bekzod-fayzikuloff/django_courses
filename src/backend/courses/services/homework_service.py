@@ -13,7 +13,7 @@ class HomeworkService(BaseService):
         queryset = self.instance.queryset.filter(query_filter)
         return queryset
 
-    def get_retrieve(self, request, *args, **kwargs) -> QuerySet:
+    def get_retrieve(self, request, *args, **kwargs) -> Homework:
         queryset = get_object_or_404(Homework, *args, **kwargs)
         return queryset
 
@@ -30,7 +30,7 @@ class HomeworkService(BaseService):
         return self.instance.get_queryset().filter(homework=homework)
 
     @staticmethod
-    def add_score(request, **kwargs):
+    def add_score(request, **kwargs) -> Score:
         pk = kwargs.get("pk")
         homework = Homework.objects.get(pk=pk)
         teacher = Teacher.objects.get(user=request.user)

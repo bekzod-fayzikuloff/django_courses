@@ -1,5 +1,5 @@
 from django_filters import rest_framework as filters
-from .models import Course, Lecture, Homework, Score, Comment
+from .models import Course, Lecture, Homework, Score, Comment, Student, Teacher
 
 
 class CourseFilter(filters.FilterSet):
@@ -19,6 +19,7 @@ class LectureFilter(filters.FilterSet):
             "name": ["exact", "icontains"],
             "course__name": ["exact", "contains"],
             "course__owner__user__username": ["exact", "contains"],
+            "homework_question": ["exact", "contains"]
         }
 
 
@@ -46,3 +47,15 @@ class CommentFilter(filters.FilterSet):
     class Meta:
         model = Comment
         fields = ["score", "text"]
+
+
+class StudentFilter(filters.FilterSet):
+    class Meta:
+        model = Student
+        fields = ["user__username", ]
+
+
+class TeacherFilter(filters.FilterSet):
+    class Meta:
+        model = Teacher
+        fields = ["user__username", ]

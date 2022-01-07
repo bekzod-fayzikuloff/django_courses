@@ -42,3 +42,7 @@ class BaseService(metaclass=abc.ABCMeta):
     @staticmethod
     def _user_filter(request: Request) -> Q:
         return Q(student__user=request.user) | Q(teacher__user=request.user)
+
+    @staticmethod
+    def _teacher_filter(request: Request) -> Q:
+        return Q(teacher__user=request.user)

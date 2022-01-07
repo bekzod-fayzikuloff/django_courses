@@ -165,3 +165,9 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "username", "email", "average_score"]
+
+
+class LectureCreateIntoCourseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Lecture
+        exclude = ('course', )
