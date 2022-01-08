@@ -4,6 +4,11 @@ from .models import Student
 
 
 class IsCourseTeacher(BasePermission):
+    def has_permission(self, request, view):
+        if request.user.is_authenticated:
+            return True
+        return False
+
     def has_object_permission(self, request, view, obj) -> bool:
 
         return bool(obj.teacher_set.filter(user=request.user))

@@ -13,7 +13,6 @@ from courses.models import Course
 
 
 class UserAsTeacherService(BaseService):
-
     def get_list(self, request: Request, *args, **kwargs) -> QuerySet:
         pass
 

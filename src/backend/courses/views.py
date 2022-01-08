@@ -12,8 +12,15 @@ from rest_framework.response import Response
 
 
 from .mixins import BaseActionMixin
-from .filters import CourseFilter, LectureFilter, HomeworkFilter, ScoreFilter, CommentFilter, TeacherFilter, \
-    StudentFilter
+from .filters import (
+    CourseFilter,
+    LectureFilter,
+    HomeworkFilter,
+    ScoreFilter,
+    CommentFilter,
+    TeacherFilter,
+    StudentFilter,
+)
 from .permissions import IsCourseTeacher, IsLectureCourseTeacher, IsLectureCourseStudent, IsHomeWorkOwner
 from .services import (
     CourseService,
@@ -726,6 +733,7 @@ class UserAsTeacherViewSet(
 ):
     service = UserAsTeacherService
     serializer_class = UserSerializer
+    permission_classes = (IsCourseTeacher,)
 
     def list(self, request: Request) -> Response:
         queryset = self.filter_queryset(self.get_depends())
@@ -740,9 +748,7 @@ class UserAsTeacherViewSet(
     @action(methods=["GET"], detail=False)
     def lectures(self, request: Request) -> Response:
         service = self.service(self)
-        queryset = self.filter_queryset(
-            service.get_action_list(service.action_list_filter())
-        )
+        queryset = self.filter_queryset(service.get_action_list(service.action_list_filter()))
         data = self.get_serializer_class()(queryset, many=True).data
         return Response(data=data)
 
@@ -763,21 +769,16 @@ class UserAsTeacherViewSet(
     @action(methods=["GET"], detail=False)
     def scores(self, request: Request) -> Response:
         service = self.service(self)
-        queryset = self.filter_queryset(
-            service.get_action_list(service.action_list_filter())
-        )
+        queryset = self.filter_queryset(service.get_action_list(service.action_list_filter()))
         data = self.get_serializer_class()(queryset, many=True).data
         return Response(data=data)
 
     @action(methods=["GET"], detail=True)
     def course_lecture(self, request: Request, pk: int, lecture_pk: int = None) -> Response:
         service = self.service(self)
-        queryset = \
-            self.filter_queryset(
-                service.get_course_actions(
-                    request, pk=pk, filter_mask=service.get_course_filter
-                )
-            )
+        queryset = self.filter_queryset(
+            service.get_course_actions(request, pk=pk, filter_mask=service.get_course_filter)
+        )
         if lecture_pk is not None:
             return service.get_instance(queryset=queryset, pk=lecture_pk)
         data = self.get_serializer_class()(queryset, many=True).data
@@ -785,35 +786,26 @@ class UserAsTeacherViewSet(
 
     @action(methods=["GET"], detail=True)
     def course_students(self, request: Request, pk: int) -> Response:
-        queryset = \
-            self.filter_queryset(
-                self.service(self).get_course_actions(
-                    request, pk=pk, filter_mask=self.service.get_course_filter
-                )
-            )
+        queryset = self.filter_queryset(
+            self.service(self).get_course_actions(request, pk=pk, filter_mask=self.service.get_course_filter)
+        )
         data = self.get_serializer_class()(queryset, many=True).data
         return Response(data=data)
 
     @action(methods=["GET"], detail=True)
     def course_teachers(self, request: Request, pk: int) -> Response:
-        queryset = \
-            self.filter_queryset(
-                self.service(self).get_course_actions(
-                    request, pk=pk, filter_mask=self.service.get_course_filter
-                )
-            )
+        queryset = self.filter_queryset(
+            self.service(self).get_course_actions(request, pk=pk, filter_mask=self.service.get_course_filter)
+        )
         data = self.get_serializer_class()(queryset, many=True).data
         return Response(data=data)
 
     @action(methods=["GET"], detail=True)
     def course_homeworks(self, request: Request, pk: int, homework_pk: int = None) -> Response:
         service = self.service(self)
-        queryset = \
-            self.filter_queryset(
-                service.get_course_actions(
-                    request, pk=pk, filter_mask=service.get_course_homework_filter
-                )
-            )
+        queryset = self.filter_queryset(
+            service.get_course_actions(request, pk=pk, filter_mask=service.get_course_homework_filter)
+        )
         if homework_pk is not None:
             service.get_instance(queryset=queryset, pk=homework_pk)
         data = self.get_serializer_class()(queryset, many=True).data
@@ -821,23 +813,17 @@ class UserAsTeacherViewSet(
 
     @action(methods=["GET"], detail=True)
     def course_scores(self, request: Request, pk: int) -> Response:
-        queryset = \
-            self.filter_queryset(
-                self.service(self).get_course_actions(
-                    request, pk=pk, filter_mask=self.service.get_course_score_filter
-                )
-            )
+        queryset = self.filter_queryset(
+            self.service(self).get_course_actions(request, pk=pk, filter_mask=self.service.get_course_score_filter)
+        )
         data = self.get_serializer_class()(queryset, many=True).data
         return Response(data=data)
 
     @action(methods=["GET"], detail=True)
     def course_comments(self, request: Request, pk: int) -> Response:
-        queryset = \
-            self.filter_queryset(
-                self.service(self).get_course_actions(
-                    request, pk=pk, filter_mask=self.service.get_course_comment_filter
-                )
-            )
+        queryset = self.filter_queryset(
+            self.service(self).get_course_actions(request, pk=pk, filter_mask=self.service.get_course_comment_filter)
+        )
         data = self.get_serializer_class()(queryset, many=True).data
         return Response(data=data)
 
@@ -881,7 +867,7 @@ class UserAsTeacherViewSet(
             "add_teacher": ListTeacherSerializer,
             "remove_student": BaseStudentSerializer,
             "add_lecture": LectureCreateIntoCourseSerializer,
-            "add_score": BaseScoreSerializer
+            "add_score": BaseScoreSerializer,
         }
         return actions.get(self.action, self.serializer_class)
 
@@ -889,6 +875,7 @@ class UserAsTeacherViewSet(
         actions = {
             "list": Course.objects.all(),
             "retrieve": Course.objects.all(),
+            "destroy": Course.objects.all(),
             "lectures": Lecture.objects.all(),
             "homeworks": Homework.objects.all(),
             "comments": Comment.objects.all(),
@@ -906,6 +893,7 @@ class UserAsTeacherViewSet(
         actions = {
             "list": CourseFilter,
             "lectures": LectureFilter,
+            "destroy": CourseFilter,
             "homeworks": HomeworkFilter,
             "comments": CommentFilter,
             "scores": ScoreFilter,
@@ -914,7 +902,7 @@ class UserAsTeacherViewSet(
             "course_teachers": TeacherFilter,
             "course_homeworks": HomeworkFilter,
             "course_scores": ScoreFilter,
-            "course_comments": CommentFilter
+            "course_comments": CommentFilter,
         }
         return actions.get(self.action)(self.request.GET, queryset).qs
 
@@ -925,9 +913,5 @@ class UserAsTeacherViewSet(
         return actions.get(self.action)
 
     def get_action_mode(self):
-        actions = {
-            "add_student": Student,
-            "add_teacher": Teacher,
-            "remove_student": Student
-        }
+        actions = {"add_student": Student, "add_teacher": Teacher, "remove_student": Student}
         return actions.get(self.action)

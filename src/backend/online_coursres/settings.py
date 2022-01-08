@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'django.contrib.sites',
+    "django.contrib.sites",
     # 3rd party
     "rest_framework",
     "rest_framework_simplejwt",
@@ -97,8 +97,8 @@ DATABASES = {
         "PASSWORD": os.environ.get("DB_PASSWORD"),
         "HOST": "localhost",  # os.environ.get("DB_HOST"),
         "PORT": int(os.environ.get("DB_PORT")),
-        'TEST': {
-            'NAME': os.environ.get("TEST_DB_NAME"),
+        "TEST": {
+            "NAME": os.environ.get("TEST_DB_NAME"),
         },
     },
 }

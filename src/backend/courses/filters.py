@@ -19,7 +19,7 @@ class LectureFilter(filters.FilterSet):
             "name": ["exact", "icontains"],
             "course__name": ["exact", "contains"],
             "course__owner__user__username": ["exact", "contains"],
-            "homework_question": ["exact", "contains"]
+            "homework_question": ["exact", "contains"],
         }
 
 
@@ -52,10 +52,14 @@ class CommentFilter(filters.FilterSet):
 class StudentFilter(filters.FilterSet):
     class Meta:
         model = Student
-        fields = ["user__username", ]
+        fields = [
+            "user__username",
+        ]
 
 
 class TeacherFilter(filters.FilterSet):
     class Meta:
         model = Teacher
-        fields = ["user__username", ]
+        fields = [
+            "user__username",
+        ]

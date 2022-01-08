@@ -13,19 +13,19 @@ router.register(r"me-as-teacher", UserAsTeacherViewSet, basename="me_as_teacher"
 
 urlpatterns = [
     path(
-        'me-as-teacher/<int:pk>/course_lecture/<int:lecture_pk>/',
+        "me-as-teacher/<int:pk>/course_lecture/<int:lecture_pk>/",
         UserAsTeacherViewSet.as_view({"get": "course_lecture"}),
-        name="lecture-course-detail"
+        name="lecture-course-detail",
     ),
     path(
-        'me-as-teacher/<int:pk>/course_homeworks/<int:homework_pk>/',
+        "me-as-teacher/<int:pk>/course_homeworks/<int:homework_pk>/",
         UserAsTeacherViewSet.as_view({"get": "course_homeworks"}),
-        name="lecture-course-detail"
+        name="lecture-course-detail",
     ),
     path(
-        'me-as-teacher/<int:pk>/course_scores/<int:homework_pk>/',
+        "me-as-teacher/<int:pk>/course_scores/<int:homework_pk>/",
         UserAsTeacherViewSet.as_view({"post": "add_score"}),
-        name="lecture-course-detail"
+        name="lecture-course-detail",
     ),
 ]
 

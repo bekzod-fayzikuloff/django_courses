@@ -170,4 +170,4 @@ class UserSerializer(serializers.ModelSerializer):
 class LectureCreateIntoCourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lecture
-        exclude = ('course', )
+        exclude = ("course",)
